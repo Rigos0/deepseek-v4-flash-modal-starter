@@ -6,7 +6,7 @@
       "npm": "@ai-sdk/openai-compatible",
       "name": "4xB300 modal",
       "options": {
-        "baseURL": "https://<your-app>.modal.run/v1",
+        "baseURL": "https://<your-server>.us-east.modal.direct/v1",
         "apiKey": "{env:MODAL_PROXY_TOKEN}"
       },
       "models": {

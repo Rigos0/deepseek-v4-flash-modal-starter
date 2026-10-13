@@ -1,14 +1,38 @@
 """DeepSeek-V4.1-Flash on four Modal B300s with vLLM.
 
-    modal secret create huggingface HF_TOKEN=hf_...   # once
-    modal run deepseek_v41_flash.py --download-only  # cache weights on CPU
-    modal deploy deepseek_v41_flash.py           # publish the endpoint
-    modal run deepseek_v41_flash.py              # send one test request
-    modal app stop deepseek-v41-flash-starter     # stop compute; volumes remain
+Run from this repository on your laptop (Python 3.10+):
 
-The server is private: Modal's edge checks a proxy token before a request reaches
-the GPU. Create one with `modal workspace proxy-tokens create` and send it as
-`Authorization: Bearer wk-....ws-...`.
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
+    modal setup
+    modal profile current                      # verify the workspace with credits
+    # If needed: modal profile activate YOUR_PROFILE
+    modal secret create huggingface HF_TOKEN=hf_...   # Hugging Face read token
+    modal run deepseek_v41_flash.py --download-only  # cache weights on CPU
+    modal deploy deepseek_v41_flash.py           # save the printed server URL
+    modal workspace proxy-tokens create         # in the same workspace
+    export MODAL_PROXY_TOKEN="wk-YOUR_ID.ws-YOUR_SECRET"
+    modal run deepseek_v41_flash.py              # wait for a successful test reply
+
+With OpenCode installed, copy opencode.json into your coding project (merge any
+existing config). Replace its example baseURL with the deployed URL + /v1.
+Start `opencode` from the terminal containing MODAL_PROXY_TOKEN. Select
+modal/deepseek-v4.1-flash. Never commit the actual proxy token.
+
+Verified 2026-10-12: four B300s, chat, streaming, usage, tool calls, and an OpenCode
+edit/test loop (5 tests passed). First GPU startup took about 45 minutes after
+weight download; cached restart time and full-context/concurrency limits are
+not benchmarked. Startup consumes GPU credits too.
+
+After 10 idle minutes the server scales to zero. If OpenCode gets a 503 on a
+later visit, rerun the test command above to wait for readiness, then retry.
+To stop compute immediately (the cached volumes remain):
+
+    modal app stop deepseek-v41-flash-starter
+
+The server is private: Modal's edge checks the proxy token before a request
+reaches the GPU, using `Authorization: Bearer wk-....ws-...`.
 """
 
 import json
@@ -139,6 +163,7 @@ def main(prompt: str = "What is 17*19? Return only the integer.", download_only:
         data=json.dumps(body).encode(),
         headers={"Content-Type": "application/json", "Authorization": f"Bearer {token}"},
     )
+    print("Waiting for the server; first GPU startup took about 45 minutes in our test.", flush=True)
     deadline = time.monotonic() + 120 * MINUTES
     while time.monotonic() < deadline:  # retry 503 while the model starts
         try:
