@@ -4,14 +4,14 @@
   "provider": {
     "modal": {
       "npm": "@ai-sdk/openai-compatible",
-      "name": "DeepSeek V4.1 Flash on Modal",
+      "name": "4xB300 modal",
       "options": {
         "baseURL": "https://<your-app>.modal.run/v1",
         "apiKey": "{env:MODAL_PROXY_TOKEN}"
       },
       "models": {
         "deepseek-v4.1-flash": {
-          "name": "DeepSeek V4.1 Flash (4x B300)",
+          "name": "DeepSeek V4.1 Flash",
           "limit": {
             "context": 262144,
             "output": 65536
