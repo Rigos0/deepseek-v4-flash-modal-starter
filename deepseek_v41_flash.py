@@ -62,6 +62,7 @@ image = (
         "FLASHINFER_WORKSPACE_BASE": "/root/.cache/vllm",
         "VLLM_FLASHINFER_AUTOTUNE_CACHE_DIR": "/root/.cache/vllm/flashinfer-autotune",
         "TRITON_CACHE_DIR": "/root/.cache/vllm/triton",
+        "TILELANG_CACHE_DIR": "/root/.cache/vllm/tilelang",
         "CUDA_CACHE_PATH": "/root/.cache/vllm/cuda",
     })
 )
