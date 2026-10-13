@@ -4,7 +4,7 @@
     modal run deepseek_v41_flash.py --download-only  # cache weights on CPU
     modal deploy deepseek_v41_flash.py           # publish the endpoint
     modal run deepseek_v41_flash.py              # send one test request
-    modal app stop deepseek-v41-flash-starter                  # stop paying
+    modal app stop deepseek-v41-flash-starter     # stop compute; volumes remain
 
 The server is private: Modal's edge checks a proxy token before a request reaches
 the GPU. Create one with `modal workspace proxy-tokens create` and send it as
@@ -56,7 +56,14 @@ VLLM_ARGS = [
 image = (
     modal.Image.from_registry(VLLM_IMAGE, add_python="3.12")
     .entrypoint([])
-    .env({"HF_XET_HIGH_PERFORMANCE": "1", "VLLM_ENGINE_READY_TIMEOUT_S": "7200"})
+    .env({
+        "HF_XET_HIGH_PERFORMANCE": "1",
+        "VLLM_ENGINE_READY_TIMEOUT_S": "7200",
+        "FLASHINFER_WORKSPACE_BASE": "/root/.cache/vllm",
+        "VLLM_FLASHINFER_AUTOTUNE_CACHE_DIR": "/root/.cache/vllm/flashinfer-autotune",
+        "TRITON_CACHE_DIR": "/root/.cache/vllm/triton",
+        "CUDA_CACHE_PATH": "/root/.cache/vllm/cuda",
+    })
 )
 
 app = modal.App("deepseek-v41-flash-starter")
